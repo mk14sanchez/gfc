@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<include href="head.html" />
+<body>
+    <include href="nav_menu.html" />
+    User: {{ @SESSION.user['lastname'] }}, {{ @SESSION.user['firstname'] }} {{ @SESSION.user['middlename'] }}
+    <form action="/gfc{{ @ALIASES.loans_apply }}" method="post">
+        <label>Payment terms (in Months): </label> <input name="loan_term" type="text"><br />
+        <label>Plate No.: </label> <input name="car_id" type="text"><br />
+        <label>Year model: </label> <input name="year_model" type="text"><br />
+        <label>Accessories: </label> <input name="accessories" type="text"><br />
+        <label>Dealer: </label> <input name="dealer" type="text"><br />
+        <label>Dealer Address: </label> <input name="dealer_address" type="text"><br />
+        <label>Brand: </label>
+        <select name="brand">
+            <repeat group="{{ @car_brands }}" value="{{ @brand }}">
+                <option value="{{ @brand.brand_code }}">{{ @brand.name }}</option>
+            </repeat>
+        </select><br />
+        <label>Car type: </label>
+        <select name="car_type">
+            <repeat group="{{ @car_types }}" value="{{ @type }}">
+                <option value="{{ @type.type_no }}">{{ @type.description }}</option>
+            </repeat>
+        </select><br />
+        <label>Car status: </label>
+        <select name="car_status">
+            <repeat group="{{ @car_stats }}" value="{{ @cstatus }}">
+                <option value="{{ @cstatus.id }}">{{ @cstatus.name }}</option>
+            </repeat>
+        </select><br />
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>

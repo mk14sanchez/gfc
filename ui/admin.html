@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<include href="head.html" />
+<body>
+<include href="nav_menu.html" />
+
+User: {{ @SESSION.user['email'] }}
+<check if="{{ @loans_results }}">
+    <true>
+        <table border="1">
+            <thead>
+            <tr>
+                <th>Loan No.</th>
+                <th>Borrower's Name</th>
+                <th>Date</th>
+                <th>Loan status</th>
+                <th>Amt. Financed</th>
+                <th>Term</th>
+                <th>Plate No.</th>
+                <th>Type</th>
+                <th>Brand</th>
+                <th>Year Model</th>
+                <th>Accessories</th>
+                <th>Dealer</th>
+                <th>Car Status</th>
+                <check if="@PATH == @ALIASES.loans_list">
+                    <true>
+                        <th>Options</th>
+                    </true>
+                </check>
+            </tr>
+            </thead>
+            <tbody>
+            <form action="/gfc{{ @ALIASES.loans_list }}" method="post">
+                <repeat group="{{ @loans_results }}" value="{{ @loans_result }}">
+                    <tr>
+                        <td>{{ @loans_result.loan_no }}</td>
+                        <td>{{ @loans_result.lastname }}, {{ @loans_result.firstname }} {{ @loans_result.middlename }}</td>
+                        <td>{{ @loans_result.date }}</td>
+                        <td>{{ @loans_result.status }}</td>
+                        <td><input value="{{ @loans_result.amount_financed }}" type="text" maxlength="32" name="amt_financed_{{ @loans_result.loan_no }}"></td>
+                        <td>{{ @loans_result.term }}</td>
+                        <td>{{ @loans_result.car_id }}</td>
+                        <td>{{ @loans_result.description }}</td>
+                        <td>{{ @loans_result.brand_name }}</td>
+                        <td>{{ @loans_result.year_model }}</td>
+                        <td>{{ @loans_result.accessories }}</td>
+                        <td>{{ @loans_result.dealer }}</td>
+                        <td>{{ @loans_result.car_status }}</td>
+                        <check if="@PATH == @ALIASES.loans_list">
+                            <true>
+                                <td><button name="reject" value="{{ @loans_result.loan_no }}" type="submit" >Reject</button> | <button value="{{ @loans_result.loan_no }}" name="approve" type="submit">Approve</button></td>
+                            </true>
+                        </check>
+
+                    </tr>
+                </repeat>
+            </form>
+            </tbody>
+        </table>
+    </true>
+    <false>
+        <p>No results found.</p>
+    </false>
+</check>
+</body>
+</html>

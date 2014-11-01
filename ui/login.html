@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<include href="head.html" />
+<body>
+    <span class="error" style="color: red;">{{ @login_error }}</span>
+    <form method="post" action="/gfc{{ @ALIASES.login }}">
+        <label>Email: </label> <input type="text" name="email"><br />
+        <label>Password: </label> <input type="password" name="password">
+        <br />
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>

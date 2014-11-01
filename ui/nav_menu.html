@@ -1,0 +1,22 @@
+<check if="{{ @SESSION.user}}">
+    <true>
+        <a href="/gfc{{ @ALIASES.logout }}">Logout</a>
+    </true>
+    <false>
+        <a href="/gfc{{ @ALIASES.login }}">Login</a>
+    </false>
+</check>
+<a href="/gfc{{@ALIASES.loans_list}}">Show Pending</a>
+<a href="/gfc{{@ALIASES.loans_list_approved}}">Show Approved</a>
+<a href="/gfc{{@ALIASES.loans_list_rejected }}">Show Rejected</a>
+<check if="{{ @SESSION.user[user_type]== 'user' }}">
+    <true>
+        <check if="{{@PATH != @ALIASES.loans_apply}}">
+            <true>
+                <a href="/gfc{{ @ALIASES.loans_apply }}">Apply Loan</a>
+            </true>
+
+        </check>
+    </true>
+</check>
+<br />

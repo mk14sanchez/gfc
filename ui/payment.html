@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<include href="head.html" />
+<body>
+    <p>Amount: {{ @payment.amount }}</p>
+    <p>Interest: {{ @payment.interest }}</p>
+    <p>Total: {{ @payment.total }}</p>
+    <p>Monthly Payment: Php {{ @payment.monthly_due}} every month for {{ @payment.term}} mos.</p>
+    <br />
+    <a href="/gfc{{@ALIASES.loans_list}}">Back</a>
+</body>
+</html>
