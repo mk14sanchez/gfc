@@ -9,14 +9,19 @@
 <a href="/gfc{{@ALIASES.loans_list}}">Show Pending</a>
 <a href="/gfc{{@ALIASES.loans_list_approved}}">Show Approved</a>
 <a href="/gfc{{@ALIASES.loans_list_rejected }}">Show Rejected</a>
-<check if="{{ @SESSION.user[user_type]== 'user' }}">
+<check if="{{ @SESSION.user[user_type] != 'user' }}">
     <true>
+        <check if="{{@PATH != @ALIASES.search}}">
+            <true>
+                <a href="/gfc{{ @ALIASES.search }}">Search Users</a>
+            </true>
+        </check>    </true>
+    <false>
         <check if="{{@PATH != @ALIASES.loans_apply}}">
             <true>
                 <a href="/gfc{{ @ALIASES.loans_apply }}">Apply Loan</a>
             </true>
-
         </check>
-    </true>
+    </false>
 </check>
 <br />
