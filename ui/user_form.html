@@ -1,0 +1,64 @@
+<label>Email: </label> <input type="text" name="email" value="{{ @user.email }}" readonly=readonly><br />
+<label>Username: </label> <input type="text" name="username" value="{{ @user.username }}"><br />
+<label>Password: </label> <input type="password" name="password" value="{{@user.password }}"><br />
+<label>Confirm Password: </label> <input type="password" name="password2" value="{{@user.password }}"><br />
+
+<label>Last Name: </label> <input type="text" name="last_name" value="{{ @user.lastname }}"><br />
+<label>First Name: </label> <input type="text" name="first_name" value="{{ @user.firstname }}"><br />
+<label>Middle Name: </label> <input type="text" name="middle_name" value="{{ @user.middlename }}"><br />
+<label>Address: </label> <input type="text" name="user_address" value="{{ @user.address }}"><br />
+<label>Telephone No.: </label> <input type="text" name="user_tel_no" value="{{ @user.contact_no }}"><br />
+<label>Year Address: </label> <input type="text" name="year_address" value="{{ @user.year_in_address }}"><br />
+<label>Date of Birth: </label> <input type="date" name="birth_date" value="{{ @user.birthdate }}"><br />
+<label>Marital Status: </label>
+<check if="{{ @user }}">
+    <true>
+        <select name="marital_status">
+            <option value="Single">Single</option>
+            <option value="Married">Married</option>
+            <option value="Separated">Separated</option>
+            <option value="Widow">Widow</option>
+        </select>
+    </true>
+    <false>
+        <select name="marital_status">
+            <option value="Single">Single</option>
+            <option value="Married">Married</option>
+            <option value="Separated">Separated</option>
+            <option value="Widow">Widow</option>
+        </select>
+    </false>
+</check>
+<br />
+<label>Number of Dependents: </label> <input type="text" name="number_of_dependents"  value="{{ @borrower.no_of_dependencies }}"><br/>
+<label>Citizenship: </label> <input type="text" name="citizenship" value="{{ @borrower.citizenship }}"><br/>
+
+<label>Source of Income: </label><input type="radio" name="income_source" value="Employment">Employment <input type="radio" name="income_source" value="Business">Business<br/>
+<label>Length of Employment: </label> <input type="text" name="len_of_employment" value="{{ @borrower.length_of_employment }}"><br/>
+<label>Name of Firm: </label> <input type="text" name="name_of_firm" value="{{ @borrower.name_of_firm }}"><br/>
+<label>Address: </label> <input type="text" name="firm_address" value="{{ @borrower.firm_address }}"><br/>
+<label>Position: </label> <input type="text" name="position" value="{{ @borrower.position }}"><br/>
+<label>Previous Employment: </label> <input type="text" name="previous_employment" value="{{ @borrower.previous_employment }}"><br/>
+<label>Address: </label> <input type="text" name="previous_employment_address" value="{{ @borrower.previous_employment_address }}"><br/>
+<label>Telephone No.: </label> <input type="text" name="previous_employment_tel_no" value="{{ @borrower.previous_employment_tel_no }}"><br/>
+<label>Monthly Income: </label> <input type="text" name="monthly_income" value="{{ @borrower.monthly_income }}"><br/>
+<label>Other income: </label> <input type="text" name="other_income" value="{{ @borrower.other_income_source }}"><br/>
+<label>Source: </label> <input type="text" name="other_income_source" value="{{ @borrower.other_income }}"><br/>
+<br />
+<hr/>
+<h2>
+    Spouse
+</h2>
+<label>Spouse Name: </label> <input type="text" name="spouse_name" value="{{ @borrower.spousename }}"><br/>
+<label>Birth date: </label> <input type="date" name="spouse_birthdate" value="{{ @borrower.spouse_birthdate }}"><br/>
+<label>Source of Income: </label>    <label>Source of Income: </label><input type="radio" name="spouse_income_source" value="Employment">Employment <input type="radio" name="spouse_income_source" value="Business">Business<br/>
+<label>Name of Firm: </label> <input type="text" name="spouse_firm" value="{{ @borrower.spouse_firm }}"><br/>
+<label>Position: </label> <input type="text" name="spouse_position" value="{{ @borrower.spouse_position }}"><br/>
+<label>Address: </label> <input type="text" name="spouse_address" value="{{ @borrower.spouse_address }}"><br/>
+<label>Telephone No.: </label> <input type="text" name="spouse_tel_no" value="{{ @borrower.spouse_tel_no }}"><br/>
+<label>Length of Employment: </label> <input type="text" name="spouse_len_of_employment" value="{{ @borrower.length_of_employment }}"><br/>
+<label>Monthly Income: </label> <input type="text" name="spouse_monthly_income" value="{{ @borrower.spouse_len_of_employment }}"><br/>
+<label>Other Income: </label> <input type="text" name="spouse_other_income" value="{{ @borrower.spouse_other_income }}"><br/>
+<label>Source: </label> <input type="text" name="spouse_other_source_of_income" value="{{ @borrower.spouse_other_income_source }}"><br/>
+<br />
+<input type="submit" value="Submit">

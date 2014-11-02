@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<include href="head.html" />
+<body>
+    <include href="nav_menu.html" />
+    <span>"{{ @profile_update_msg }}"</span>
+    <form method="post" action="/gfc{{ @ALIASES.profile }}">
+        <include href="user_form.html" />
+    </form>
+</body>
+</html>
