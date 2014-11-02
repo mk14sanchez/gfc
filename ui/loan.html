@@ -3,7 +3,7 @@
 <body>
     <include href="nav_menu.html" />
 
-    User: {{ @SESSION.user['lastname'] }}, {{ @SESSION.user['firstname'] }} {{ @SESSION.user['middlename'] }}
+    User: <a href="/gfc{{ @ALIASES.profile }}">{{ @SESSION.user['lastname'] }}, {{ @SESSION.user['firstname'] }} {{ @SESSION.user['middlename'] }}</a>
     <check if="{{ @loans_results }}">
     <true>
         <table border="1">

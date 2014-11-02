@@ -29,6 +29,8 @@ $f3->route('GET @loans_list_rejected: /loan/rejected', 'LoanController->display_
 $f3->route('GET|POST @loans_apply: /loan/apply', 'LoanController->apply');
 $f3->route('POST @loans_payment: /loan/payment', 'LoanController->compute_payment');
 $f3->route('GET|POST @register: /register', 'RegisterController->register');
+$f3->route('GET|POST @profile: /profile', 'UserController->profile');
+$f3->route('GET @search: /search', 'UserController->search');
 
 $f3->set('DB',
     new DB\SQL(
@@ -111,11 +113,63 @@ class User extends \DB\SQL\Mapper {
             return NULL;
         }
     }
+
+    public function search($query) {
+        //TODO: Implement search
+    }
 }
 
 class Borrower extends \DB\SQL\Mapper {
     public function __construct() {
         parent::__construct( \Base::instance()->get('DB'), 'borrower');
+    }
+
+    public function get_info($email) {
+        $user = $this->db->exec('SELECT *, c.date_of_birth AS spouse_birthdate,
+        d.source_of_income AS spouse_source_income, d.name_of_firm AS spouse_firm,
+        d.monthly_income AS spouse_monthly_income,
+        d.other_income AS spouse_other_income, d.position AS spouse_position,
+        d.length_of_employment AS spouse_len_of_employment,
+        d.other_source_of_income AS spouse_other_income_source FROM user AS a
+        LEFT JOIN borrower AS e ON a.email=e.user_email LEFT JOIN income as b
+        ON b.borrower_id = e.id LEFT JOIN spouse
+        AS c ON b.spouse_id=c.id LEFT JOIN spouse_income as d ON
+        b.spouse_id=d.spouse_id  WHERE e.user_email="' . $email . '";');
+
+        $arr_count = count($user);
+        if ($arr_count == 1) {
+            return $user[0];
+        }
+        elseif ($arr_count > 1){
+            // We have a very bad error here.
+            //TODO: Create error handling
+            return NULL;
+        }
+        else {
+            return NULL;
+        }
+    }
+
+    public function get_IDs($email) {
+     //SELECT a.id AS borrower_id, b.id AS spouse_id, c.income_code AS spouse_income_id, d.id AS income_id FROM borrower AS a LEFT JOIN spouse AS b ON a.id=b.borrower_id LEFT JOIN spouse_income AS c ON b.id=c.spouse_id LEFT JOIN income AS d ON a.id=d.borrower_id WHERE a.user_email='a@yahoo.com'
+        $user = $this->db->exec("SELECT a.id AS borrower_id, b.id AS spouse_id,
+        c.income_code AS spouse_income_id, d.id AS income_id FROM borrower AS a
+        LEFT JOIN spouse AS b ON a.id=b.borrower_id LEFT JOIN spouse_income AS
+        c ON b.id=c.spouse_id LEFT JOIN income AS d ON a.id=d.borrower_id WHERE
+        a.user_email='$email';");
+
+        $arr_count = count($user);
+        if ($arr_count == 1) {
+            return $user[0];
+        }
+        elseif ($arr_count > 1){
+            // We have a very bad error here.
+            //TODO: Create error handling
+            return NULL;
+        }
+        else {
+            return NULL;
+        }
     }
 }
 
@@ -134,6 +188,139 @@ class SpouseIncome extends \DB\SQL\Mapper {
 class Income extends \DB\SQL\Mapper {
     public function __construct() {
         parent::__construct( \Base::instance()->get('DB'), 'income');
+    }
+}
+
+class UserController {
+    public function profile($f3) {
+        if ($f3->exists('SESSION.user')) {
+
+            $user_arr = $f3->get("SESSION.user");
+            $user_email = $user_arr["email"];
+
+            $post_data = $f3->get("POST");
+            if ($post_data) {
+                if ($post_data['email']) {
+                    if ($post_data["password"] == $post_data["password2"]) {
+
+                        $db = $f3->get('DB');
+                        $db->begin();
+
+                        $user = new User();
+
+                        $user = $user->load(array("email=\"$user_email\""));
+                        $user->username = $post_data["username"];
+                        $user->password = $post_data["password"];
+                        $user->user_type = 1;
+                        $user->update();
+
+                        $user_arr = $user->get_user($user_email);
+
+                        new \Session();
+                        $f3->set('SESSION.user', $user_arr);
+
+                        $borrower = new Borrower();
+                        $borrower_data = $borrower->get_IDs($user_email);
+
+                        $borrower_id = $borrower_data['borrower_id'];
+                        $spouse_id = $borrower_data['spouse_id'];
+                        
+                        $borrower = $borrower->load(array("id=$borrower_id"));
+                        $borrower->lastname = $post_data["last_name"];
+                        $borrower->firstname = $post_data["first_name"];
+                        $borrower->middlename = $post_data["middle_name"];
+                        $borrower->address = $post_data["user_address"];
+                        $borrower->contact_no = $post_data["user_tel_no"];
+                        $borrower->year_in_address = $post_data["year_address"];
+                        $borrower->birthdate = $post_data["birth_date"];
+                        $borrower->no_of_dependencies = $post_data["number_of_dependents"];
+                        $borrower->marital_status = $post_data["marital_status"];
+                        $borrower->citizenship = $post_data["citizenship"];
+                        $borrower->update();
+
+                        if ($spouse_id) {
+                            $spouse = new Spouse();
+                            $spouse = $spouse->load(array("borrower_id=$borrower_id"));
+                            $spouse->spousename = $post_data["spouse_name"];
+                            $spouse->date_of_birth = $post_data["spouse_birthdate"];
+                            $spouse->update();
+
+                            $spouse_income = new SpouseIncome();
+                            $spouse_income->load(array("spouse_id=$spouse_id"));
+                            $spouse_income->source_of_income = $post_data["spouse_income_source"];
+                            $spouse_income->name_of_firm = $post_data["spouse_firm"];
+                            $spouse_income->monthly_income= $post_data["spouse_monthly_income"];
+                            $spouse_income->other_income = $post_data["spouse_other_income"];
+                            $spouse_income->position = $post_data["spouse_position"];
+                            $spouse_income->other_source_of_income = $post_data["spouse_other_source_of_income"];
+                            $spouse_income->spouse_address = $post_data["spouse_address"];
+                            $spouse_income->spouse_tel_no = $post_data["spouse_tel_no"];
+                            $spouse_income->length_of_employment = $post_data["spouse_len_of_employment"];
+                            $spouse_income->update();
+                        } else {
+                            $spouse = new Spouse();
+                            $spouse = $spouse->borrower_id = $borrower_id;
+                            $spouse->spousename = $post_data["spouse_name"];
+                            $spouse->date_of_birth = $post_data["spouse_birthdate"];
+                            $spouse->save();
+
+                            $spouse_id = $spouse->get('_id');
+
+                            $spouse_income = new SpouseIncome();
+                            $spouse_income->spouse_id = $spouse_id;
+                            $spouse_income->source_of_income = $post_data["spouse_income_source"];
+                            $spouse_income->name_of_firm = $post_data["spouse_firm"];
+                            $spouse_income->monthly_income= $post_data["spouse_monthly_income"];
+                            $spouse_income->other_income = $post_data["spouse_other_income"];
+                            $spouse_income->position = $post_data["spouse_position"];
+                            $spouse_income->other_source_of_income = $post_data["spouse_other_source_of_income"];
+                            $spouse_income->spouse_address = $post_data["spouse_address"];
+                            $spouse_income->spouse_tel_no = $post_data["spouse_tel_no"];
+                            $spouse_income->length_of_employment = $post_data["spouse_len_of_employment"];
+                            $spouse_income->save();
+                        }
+
+                        $income = new Income();
+                        $income->reset();
+                        $income->load(array("spouse_id=$spouse_id"));
+                        $income->borrower_id = $borrower_id;
+                        $income->source_income = $post_data["income_source"];
+                        $income->length_of_employment = $post_data["len_of_employment"];
+                        $income->name_of_firm = $post_data["name_of_firm"];
+                        $income->position = $post_data["position"];
+                        $income->firm_address = $post_data["firm_address"];
+                        $income->previous_employment = $post_data["previous_employment"];
+                        $income->previous_employment_address = $post_data["previous_employment_address"];
+                        $income->previous_employment_tel_no = $post_data["previous_employment_tel_no"];
+                        $income->monthly_income = $post_data["monthly_income"];
+                        $income->other_income_source = $post_data["other_income_source"];
+                        $income->update();
+                        $db->commit();
+
+                        $profile_update_msg = "Account successfully updated.";
+                        $f3->set("register_msg", $profile_update_msg);
+                        $f3->set('profile_update_msg', $profile_update_msg);
+                    } else {
+                        $profile_update_msg = "Passwords does not match.";
+                    }
+                }
+                else {
+                    $profile_update_msg = "Invalid email address.";
+                }
+            }
+            else {
+                $profile_update_msg = "";
+                $borrower = new Borrower();
+
+                $f3->set('user', $user_arr);
+            }
+        }
+        $f3->set('profile_update_msg', $profile_update_msg);
+        $f3->set('user', $user_arr);
+        $borrower_data = $borrower->get_info($user_email);
+
+        $f3->set('borrower', $borrower_data);
+        echo Template::instance()->render('profile.html');
     }
 }
 
@@ -194,13 +381,13 @@ class RegisterController {
                         $spouse_income->spouse_id = $spouse_id;
                         $spouse_income->source_of_income = $post_data["spouse_income_source"];
                         $spouse_income->name_of_firm = $post_data["spouse_firm"];
-                        $spouse_income->monthy_income= $post_data["spouse_monthly_income"];
+                        $spouse_income->monthly_income= $post_data["spouse_monthly_income"];
                         $spouse_income->other_income = $post_data["spouse_other_income"];
                         $spouse_income->position = $post_data["spouse_position"];
                         $spouse_income->other_source_of_income = $post_data["spouse_other_source_of_income"];
                         $spouse_income->spouse_address = $post_data["spouse_address"];
                         $spouse_income->spouse_tel_no = $post_data["spouse_tel_no"];
-                        $spouse_income->lengh_of_employment = $post_data["spouse_len_of_employment"];
+                        $spouse_income->length_of_employment = $post_data["spouse_len_of_employment"];
                         $spouse_income->save();
                     }
 
