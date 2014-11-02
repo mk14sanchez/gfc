@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<include href="head.html" />
+<body>
+<include href="nav_menu.html" />
+
+<check if="{{ @users }}">
+    <true>
+        <table border="1">
+            <thead>
+            <tr>
+                <th>Users</th>
+                <th>Options</th>
+            </tr>
+            </thead>
+            <tbody>
+            <form action="/gfc{{@ALIASES.search}}" method="post">
+                <repeat group="{{ @users }}" value="{{ @result }}">
+                    <tr>
+                        <td><a href="/gfc{{ @ALIASES.user_profile }}?email={{ @result.user_email }}">{{ @result.lastname }}, {{ @result.firstname }} {{ @result.middlename }}</a></td>
+                        <td>
+                            <button type="submit" name="delete" value="{{ @result.user_email }}">Delete</button>
+                        </td>
+                    </tr>
+                </repeat>
+            </form>
+            </tbody>
+        </table>
+    </true>
+    <false>
+        <p>No results found.</p>
+    </false>
+</check>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<include href="head.html" />
+<body>
+<include href="nav_menu.html" />
+<check if="{{@user}}">
+    <true>
+        <label>Email: </label> {{ @user.email }}><br />
+        <label>Username: </label> {{ @user.username }}<br />
+
+        <label>Last Name: </label> {{ @borrower.lastname }}<br />
+        <label>First Name: </label> {{ @borrower.firstname }}<br />
+        <label>Middle Name: </label> {{ @borrower.middlename }}<br />
+        <label>Address: </label> {{ @borrower.address }}<br />
+        <label>Telephone No.: </label> {{ @borrower.contact_no }}<br />
+        <label>Year Address: </label> {{ @borrower.year_in_address }}<br />
+        <label>Date of Birth: </label> {{ @borrower.birthdate }}<br />
+        <label>Marital Status: </label> {{ @borrower.marital_status }}
+        <br />
+        <label>Number of Dependents: </label> {{ @borrower.no_of_dependencies }}<br/>
+        <label>Citizenship: </label> {{ @borrower.citizenship }}<br/>
+
+        <label>Source of Income: </label> {{ @borrower.source_income }}<br/>
+        <label>Length of Employment: </label> {{ @borrower.length_of_employment }}<br/>
+        <label>Name of Firm: </label> {{ @borrower.name_of_firm }}<br/>
+        <label>Address: </label> {{ @borrower.firm_address }}<br/>
+        <label>Position: </label> {{ @borrower.position }}<br/>
+        <label>Previous Employment: </label> {{ @borrower.previous_employment }}<br/>
+        <label>Address: </label> {{ @borrower.previous_employment_address }}<br/>
+        <label>Telephone No.: </label> {{ @borrower.previous_employment_tel_no }}<br/>
+        <label>Monthly Income: </label> {{ @borrower.monthly_income }}<br/>
+        <label>Other income: </label> {{ @borrower.other_income_source }}<br/>
+        <label>Source: </label> {{ @borrower.other_income }}<br/>
+        <br />
+        <hr/>
+        <h2>
+            Spouse
+        </h2>
+        <label>Spouse Name: </label> {{ @borrower.spousename }}<br/>
+        <label>Birth date: </label> {{ @borrower.spouse_birthdate }}<br/>
+        <label>Source of Income: </label> {{ @borrower.source_of_income }}<br/>
+        <label>Name of Firm: </label> {{ @borrower.spouse_firm }}<br/>
+        <label>Position: </label> {{ @borrower.spouse_position }}<br/>
+        <label>Address: </label> {{ @borrower.spouse_address }}<br/>
+        <label>Telephone No.: </label> {{ @borrower.spouse_tel_no }}<br/>
+        <label>Length of Employment: </label> {{ @borrower.length_of_employment }}<br/>
+        <label>Monthly Income: </label> {{ @borrower.spouse_len_of_employment }}<br/>
+        <label>Other Income: </label> {{ @borrower.spouse_other_income }}<br/>
+        <label>Source: </label> {{ @borrower.spouse_other_income_source }}<br/>
+    </true>
+    <false>
+        <p>Unable to get details.</p>
+    </false>
+</check>
+</body>
+</html>

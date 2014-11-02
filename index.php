@@ -30,7 +30,8 @@ $f3->route('GET|POST @loans_apply: /loan/apply', 'LoanController->apply');
 $f3->route('POST @loans_payment: /loan/payment', 'LoanController->compute_payment');
 $f3->route('GET|POST @register: /register', 'RegisterController->register');
 $f3->route('GET|POST @profile: /profile', 'UserController->profile');
-$f3->route('GET @search: /search', 'UserController->search');
+$f3->route('GET @user_profile: /user_profile', 'UserController->user_profile');
+$f3->route('GET|POST @search: /search', 'UserController->search');
 
 $f3->set('DB',
     new DB\SQL(
@@ -114,14 +115,14 @@ class User extends \DB\SQL\Mapper {
         }
     }
 
-    public function search($query) {
-        //TODO: Implement search
-    }
 }
 
 class Borrower extends \DB\SQL\Mapper {
     public function __construct() {
         parent::__construct( \Base::instance()->get('DB'), 'borrower');
+    }
+    public function get_search_results($query) {
+        return $this->find("firstname LIKE '%$query%' OR lastname LIKE '%$query%'");
     }
 
     public function get_info($email) {
@@ -224,7 +225,7 @@ class UserController {
 
                         $borrower_id = $borrower_data['borrower_id'];
                         $spouse_id = $borrower_data['spouse_id'];
-                        
+
                         $borrower = $borrower->load(array("id=$borrower_id"));
                         $borrower->lastname = $post_data["last_name"];
                         $borrower->firstname = $post_data["first_name"];
@@ -258,26 +259,27 @@ class UserController {
                             $spouse_income->length_of_employment = $post_data["spouse_len_of_employment"];
                             $spouse_income->update();
                         } else {
-                            $spouse = new Spouse();
-                            $spouse = $spouse->borrower_id = $borrower_id;
-                            $spouse->spousename = $post_data["spouse_name"];
-                            $spouse->date_of_birth = $post_data["spouse_birthdate"];
-                            $spouse->save();
+                            if ($post_data["spouse_name"]) {
+                                $spouse = new Spouse();
+                                $spouse = $spouse->borrower_id = $borrower_id;
+                                $spouse->spousename = $post_data["spouse_name"];
+                                $spouse->date_of_birth = $post_data["spouse_birthdate"];
+                                $spouse->save();
 
-                            $spouse_id = $spouse->get('_id');
+                                $spouse_id = $spouse->get('_id');
 
-                            $spouse_income = new SpouseIncome();
-                            $spouse_income->spouse_id = $spouse_id;
-                            $spouse_income->source_of_income = $post_data["spouse_income_source"];
-                            $spouse_income->name_of_firm = $post_data["spouse_firm"];
-                            $spouse_income->monthly_income= $post_data["spouse_monthly_income"];
-                            $spouse_income->other_income = $post_data["spouse_other_income"];
-                            $spouse_income->position = $post_data["spouse_position"];
-                            $spouse_income->other_source_of_income = $post_data["spouse_other_source_of_income"];
-                            $spouse_income->spouse_address = $post_data["spouse_address"];
-                            $spouse_income->spouse_tel_no = $post_data["spouse_tel_no"];
-                            $spouse_income->length_of_employment = $post_data["spouse_len_of_employment"];
-                            $spouse_income->save();
+                                $spouse_income = new SpouseIncome();
+                                $spouse_income->spouse_id = $spouse_id;
+                                $spouse_income->source_of_income = $post_data["spouse_income_source"];
+                                $spouse_income->name_of_firm = $post_data["spouse_firm"];
+                                $spouse_income->monthly_income= $post_data["spouse_monthly_income"];
+                                $spouse_income->other_income = $post_data["spouse_other_income"];
+                                $spouse_income->position = $post_data["spouse_position"];
+                                $spouse_income->other_source_of_income = $post_data["spouse_other_source_of_income"];
+                                $spouse_income->spouse_address = $post_data["spouse_address"];
+                                $spouse_income->spouse_tel_no = $post_data["spouse_tel_no"];
+                                $spouse_income->length_of_employment = $post_data["spouse_len_of_employment"];
+                                $spouse_income->save();                            }
                         }
 
                         $income = new Income();
@@ -321,6 +323,50 @@ class UserController {
 
         $f3->set('borrower', $borrower_data);
         echo Template::instance()->render('profile.html');
+    }
+    public function search($f3) {
+        if ($f3->exists('SESSION.user')) {
+            $post_data = $f3->get("POST");
+            $users = new Borrower();
+            if ($post_data) {
+                if (isset($post_data["delete"])) {
+                    $user = new User();
+                    $email = $post_data["delete"];
+                    $user->erase(array("email='$email'"));
+                    $results =$users->find();
+                } else {
+                    $results = $users->get_search_results($post_data["query"]);
+                }
+            } else {
+                $results =$users->find();
+            }
+            $f3->set("users", $results);
+            echo Template::instance()->render('search.html');
+        } else {
+            $f3->reroute("/login");
+        }
+    }
+    public function user_profile($f3) {
+
+        if ($f3->exists('SESSION.user')) {
+
+            if ($f3->get("GET"))
+            {
+                $get_data = $f3->get("GET");
+                $user_email = $get_data["email"];
+
+                $u = new User();
+                $borrower = new Borrower();
+                $borrower_data = $borrower->get_info($user_email);
+                $user = $u->load("email='$user_email'");
+            } else {
+                $borrower_data = NULL;
+                $user = NULL;
+            }
+            $f3->set('user', $user);
+            $f3->set('borrower', $borrower_data);
+            echo Template::instance()->render('user_profile.html');
+        }
     }
 }
 
