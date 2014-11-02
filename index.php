@@ -18,7 +18,8 @@ $f3->route('GET @home: /', function($f3){
     if ($f3->exists('SESSION.user')) {
         $f3->reroute('/loan');
     }
-    $f3->reroute('/login');
+    echo Template::instance()->render('home.html');
+
 });
 
 $f3->route('GET|POST @login: /login','AuthController->login');

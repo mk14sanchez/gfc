@@ -37,7 +37,7 @@ CREATE TABLE `borrower` (
   `citizenship` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_email_UNIQUE` (`user_email`),
-  CONSTRAINT `fk_borrower_1` FOREIGN KEY (`user_email`) REFERENCES `user` (`email`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT `fk_borrower_1` FOREIGN KEY (`user_email`) REFERENCES `user` (`email`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -178,7 +178,7 @@ CREATE TABLE `spouse` (
   `date_of_birth` date DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_spouse_1_idx` (`borrower_id`),
-  CONSTRAINT `fk_spouse_1` FOREIGN KEY (`borrower_id`) REFERENCES `borrower` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT `fk_spouse_1` FOREIGN KEY (`borrower_id`) REFERENCES `borrower` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -264,4 +264,4 @@ CREATE TABLE `user_type` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-11-02 22:16:57
+-- Dump completed on 2014-11-03  7:08:17
