@@ -23,11 +23,12 @@ $f3->route('GET @home: /', function($f3){
 
 $f3->route('GET|POST @login: /login','AuthController->login');
 $f3->route('GET @logout: /logout','AuthController->logout');
-$f3->route('GET @loans_list: /loan', 'LoanController->display_pending');
+$f3->route('GET|POST @loans_list: /loan', 'LoanController->display_pending');
 $f3->route('GET @loans_list_approved: /loan/approved', 'LoanController->display_approved');
 $f3->route('GET @loans_list_rejected: /loan/rejected', 'LoanController->display_rejected');
 $f3->route('GET|POST @loans_apply: /loan/apply', 'LoanController->apply');
 $f3->route('POST @loans_payment: /loan/payment', 'LoanController->compute_payment');
+$f3->route('GET|POST @register: /register', 'RegisterController->register');
 
 $f3->set('DB',
     new DB\SQL(
@@ -112,6 +113,122 @@ class User extends \DB\SQL\Mapper {
     }
 }
 
+class Borrower extends \DB\SQL\Mapper {
+    public function __construct() {
+        parent::__construct( \Base::instance()->get('DB'), 'borrower');
+    }
+}
+
+class Spouse extends \DB\SQL\Mapper {
+    public function __construct() {
+        parent::__construct( \Base::instance()->get('DB'), 'spouse');
+    }
+}
+
+class SpouseIncome extends \DB\SQL\Mapper {
+    public function __construct() {
+        parent::__construct( \Base::instance()->get('DB'), 'spouse_income');
+    }
+}
+
+class Income extends \DB\SQL\Mapper {
+    public function __construct() {
+        parent::__construct( \Base::instance()->get('DB'), 'income');
+    }
+}
+
+
+class RegisterController {
+    public function register($f3) {
+        $register_error = "";
+
+        if ($f3->get('POST')) {
+
+            $spouse_id = NULL;
+
+            $post_data = $f3->get('POST');
+
+            $register_error = "Email is missing.";
+
+            if ($post_data['email']) {
+                $register_error = "Passwords does not match.";
+                if ($post_data["password"] == $post_data["password2"]) {
+                    $register_error = "";
+
+                    $db = $f3->get('DB');
+                    $db->begin();
+
+                    $user = new User();
+                    $user->email = $post_data["email"];
+                    $user->username = $post_data["username"];
+                    $user->password = $post_data["password"];
+                    $user->user_type = 1;
+                    $user->save();
+
+                    $borrower = new Borrower();
+                    $borrower->user_email = $post_data["email"];
+                    $borrower->lastname = $post_data["last_name"];
+                    $borrower->firstname = $post_data["first_name"];
+                    $borrower->middlename = $post_data["middle_name"];
+                    $borrower->address = $post_data["user_address"];
+                    $borrower->contact_no = $post_data["user_tel_no"];
+                    $borrower->year_in_address = $post_data["year_address"];
+                    $borrower->birthdate = $post_data["birth_date"];
+                    $borrower->no_of_dependencies = $post_data["number_of_dependents"];
+                    $borrower->marital_status = $post_data["marital_status"];
+                    $borrower->citizenship = $post_data["citizenship"];
+                    $borrower->save();
+
+                    $borrower_id = $borrower->get('_id');
+
+                    if ($post_data['spouse_name']) {
+                        $spouse = new Spouse();
+                        $spouse->borrower_id = $borrower_id;
+                        $spouse->spousename = $post_data["spouse_name"];
+                        $spouse->date_of_birth = $post_data["spouse_birthdate"];
+                        $spouse->save();
+
+                        $spouse_id = $spouse->get('_id');
+
+                        $spouse_income = new SpouseIncome();
+                        $spouse_income->spouse_id = $spouse_id;
+                        $spouse_income->source_of_income = $post_data["spouse_income_source"];
+                        $spouse_income->name_of_firm = $post_data["spouse_firm"];
+                        $spouse_income->monthy_income= $post_data["spouse_monthly_income"];
+                        $spouse_income->other_income = $post_data["spouse_other_income"];
+                        $spouse_income->position = $post_data["spouse_position"];
+                        $spouse_income->other_source_of_income = $post_data["spouse_other_source_of_income"];
+                        $spouse_income->spouse_address = $post_data["spouse_address"];
+                        $spouse_income->spouse_tel_no = $post_data["spouse_tel_no"];
+                        $spouse_income->lengh_of_employment = $post_data["spouse_len_of_employment"];
+                        $spouse_income->save();
+                    }
+
+                    $income = new Income();
+                    $income->spouse_id = $spouse_id;
+                    $income->borrower_id = $borrower_id;
+                    $income->source_income = $post_data["income_source"];
+                    $income->length_of_employment = $post_data["len_of_employment"];
+                    $income->name_of_firm = $post_data["name_of_firm"];
+                    $income->position = $post_data["position"];
+                    $income->firm_address = $post_data["firm_address"];
+                    $income->previous_employment = $post_data["previous_employment"];
+                    $income->previous_employment_address = $post_data["previous_employment_address"];
+                    $income->previous_employment_tel_no = $post_data["previous_employment_tel_no"];
+                    $income->monthly_income = $post_data["monthly_income"];
+                    $income->other_income_source = $post_data["other_income_source"];
+                    $income->save();
+                    $db->commit();
+                    $f3->set("login_error", "Account successfully created.");
+                    $f3->reroute('/login');
+                }
+            }
+        }
+        $f3->set('register_error', $register_error);
+        echo Template::instance()->render('register.html');
+    }
+}
+
 class AuthController {
     public function login($f3){
         if ($f3->exists('SESSION.user')) {
@@ -166,7 +283,7 @@ class LoanController {
             $INTEREST = .10; //This interest is hardcoded.
 
             $amt = $result->amount_financed;
-            $total = $amt * $INTEREST;
+            $total = $amt * $INTEREST + $amt;
             $term = $result->term;
             $montly_due = round($total/$term, 2);
             $payment = array(
@@ -257,7 +374,11 @@ class LoanController {
             $loan->load(array("loan_no=$loan_no"));
             $loan->status=$status;
             $loan->amount_financed=$amt_financed;
+
+            $db = $f3->get("DB");
+            $db->begin();
             $loan->update();
+            $db->commit();
         }
 
         $loan = new LoansDetail();
@@ -285,6 +406,9 @@ class LoanController {
         $post_data = $f3->get('POST');
 
         if ($post_data) {
+
+            $db = $f3->get("DB");
+            $db->begin();
             $car = new Car();
 
             $car->car_id=$post_data['car_id'];
@@ -308,6 +432,7 @@ class LoanController {
             $loan_details->car_id= $post_data['car_id'];
             $loan_details->loan_no = $loans->get('_id');
             $loan_details->save();
+            $db->commit();
 
             $f3->reroute('/loan');
         }
