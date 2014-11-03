@@ -71,14 +71,16 @@ CREATE TABLE `car` (
   `dealer` varchar(45) DEFAULT NULL,
   `address` text,
   `status_id` int(10) unsigned DEFAULT NULL,
+  `ci_status` enum('Pending','Approved','Rejected') DEFAULT 'Pending',
+  `ci_amount` int(11) DEFAULT '0',
   PRIMARY KEY (`car_id`),
   UNIQUE KEY `car_id_UNIQUE` (`car_id`),
   KEY `fk_car_1_idx` (`type_no`),
   KEY `fk_car_2_idx` (`brand_code`),
   KEY `fk_car_3_idx` (`status_id`),
-  CONSTRAINT `fk_car_1` FOREIGN KEY (`type_no`) REFERENCES `type` (`type_no`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_car_2` FOREIGN KEY (`brand_code`) REFERENCES `brand` (`brand_code`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_car_3` FOREIGN KEY (`status_id`) REFERENCES `car_status` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT `fk_car_1` FOREIGN KEY (`type_no`) REFERENCES `type` (`type_no`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_car_2` FOREIGN KEY (`brand_code`) REFERENCES `brand` (`brand_code`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_car_3` FOREIGN KEY (`status_id`) REFERENCES `car_status` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -135,13 +137,13 @@ CREATE TABLE `loan` (
   `loan_no` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `borrower_id` int(10) unsigned NOT NULL,
   `status` enum('Pending','Approved','Rejected') NOT NULL DEFAULT 'Pending',
-  `amount_pay` varchar(45) DEFAULT NULL,
+  `amount_pay` int(11) DEFAULT '0',
   `amount_financed` int(11) DEFAULT '0',
   `term` int(11) NOT NULL,
   `date` date DEFAULT NULL,
   PRIMARY KEY (`loan_no`),
   KEY `fk_loan_1_idx` (`borrower_id`),
-  CONSTRAINT `fk_loan_1` FOREIGN KEY (`borrower_id`) REFERENCES `borrower` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT `fk_loan_1` FOREIGN KEY (`borrower_id`) REFERENCES `borrower` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -159,8 +161,8 @@ CREATE TABLE `loan_details` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `car_id_UNIQUE` (`car_id`),
   KEY `fk_loan_details_2_idx` (`loan_no`),
-  CONSTRAINT `fk_loan_details_1` FOREIGN KEY (`car_id`) REFERENCES `car` (`car_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_loan_details_2` FOREIGN KEY (`loan_no`) REFERENCES `loan` (`loan_no`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT `fk_loan_details_2` FOREIGN KEY (`loan_no`) REFERENCES `loan` (`loan_no`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_loan_details_1` FOREIGN KEY (`car_id`) REFERENCES `car` (`car_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -179,7 +181,7 @@ CREATE TABLE `spouse` (
   PRIMARY KEY (`id`),
   KEY `fk_spouse_1_idx` (`borrower_id`),
   CONSTRAINT `fk_spouse_1` FOREIGN KEY (`borrower_id`) REFERENCES `borrower` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -204,7 +206,7 @@ CREATE TABLE `spouse_income` (
   PRIMARY KEY (`income_code`),
   KEY `fk_spouse_income_1_idx` (`spouse_id`),
   CONSTRAINT `fk_spouse_income_1` FOREIGN KEY (`spouse_id`) REFERENCES `spouse` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -236,7 +238,7 @@ CREATE TABLE `user` (
   PRIMARY KEY (`email`),
   UNIQUE KEY `email_UNIQUE` (`email`),
   KEY `fk_user_1_idx` (`user_type_code`),
-  CONSTRAINT `fk_user_1` FOREIGN KEY (`user_type_code`) REFERENCES `user_type` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT `fk_user_1` FOREIGN KEY (`user_type_code`) REFERENCES `user_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -252,7 +254,7 @@ CREATE TABLE `user_type` (
   `name` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -264,4 +266,4 @@ CREATE TABLE `user_type` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-11-03  7:08:17
+-- Dump completed on 2014-11-03 23:31:09
