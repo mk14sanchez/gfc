@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<include href="head.html" />
+<body>
+<include href="nav_menu.html" />
+
+<table border="1">
+    <thead>
+    <tr>
+        <th>Borrower</th>
+        <th>Plate No.</th>
+        <th>Type</th>
+        <th>Brand</th>
+        <th>Year Model</th>
+        <th>Accessories</th>
+        <th>Dealer</th>
+        <th>Car Status</th>
+        <th>Car Amount</th>
+        <th>Options</th>
+    </tr>
+    </thead>
+    <tbody>
+    <form action="/gfc{{@ALIASES.car_list }}" method="post">
+        <repeat group="{{ @car_results }}" value="{{ @result }}">
+            <tr>
+                <td>{{ @result.lastname }}, {{ @result.firstname }} {{ @result.middlename }}</td>
+                <td>{{ @result.car_id }}</td>
+                <td>{{ @result.description }}</td>
+                <td>{{ @result.brand_name }}</td>
+                <td>{{ @result.year_model }}</td>
+                <td>{{ @result.accessories }}</td>
+                <td>{{ @result.dealer }}</td>
+                <td>{{ @result.car_status }}</td>
+                <td><input type="text" name="amount_{{ @result.car_id }}"></td>
+                <td><button name="reject" value="{{ @result.car_id }}" type="submit" >Reject</button> | <button value="{{ @result.car_id }}" name="approve" type="submit">Approve</button></td>
+            </tr>
+        </repeat>
+    </form>
+    </tbody>
+</table>
+</body>
+</html>

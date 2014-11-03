@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<html lang="en">
 <include href="head.html" />
 <body>
 <include href="nav_menu.html" />
@@ -22,6 +23,8 @@ User: {{ @SESSION.user['email'] }}
                 <th>Accessories</th>
                 <th>Dealer</th>
                 <th>Car Status</th>
+                <th>CI Assessment</th>
+                <th>CI Estimated Amount</th>
                 <check if="@PATH == @ALIASES.loans_list">
                     <true>
                         <th>Options</th>
@@ -46,6 +49,8 @@ User: {{ @SESSION.user['email'] }}
                         <td>{{ @loans_result.accessories }}</td>
                         <td>{{ @loans_result.dealer }}</td>
                         <td>{{ @loans_result.car_status }}</td>
+                        <td>{{ @loans_result.ci_status }}</td>
+                        <td>{{ @loans_result.ci_amount }}</td>
                         <check if="@PATH == @ALIASES.loans_list">
                             <true>
                                 <td><button name="reject" value="{{ @loans_result.loan_no }}" type="submit" >Reject</button> | <button value="{{ @loans_result.loan_no }}" name="approve" type="submit">Approve</button></td>

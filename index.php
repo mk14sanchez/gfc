@@ -25,6 +25,7 @@ $f3->route('GET @home: /', function($f3){
 $f3->route('GET|POST @login: /login','AuthController->login');
 $f3->route('GET @logout: /logout','AuthController->logout');
 $f3->route('GET|POST @loans_list: /loan', 'LoanController->display_pending');
+$f3->route('GET|POST @car_list: /cars', 'CarController->car_list');
 $f3->route('GET @loans_list_approved: /loan/approved', 'LoanController->display_approved');
 $f3->route('GET @loans_list_rejected: /loan/rejected', 'LoanController->display_rejected');
 $f3->route('GET|POST @loans_apply: /loan/apply', 'LoanController->apply');
@@ -60,6 +61,12 @@ class CarStatus extends \DB\SQL\Mapper {
     }
 }
 
+class Car extends \DB\SQL\Mapper {
+    public function __construct() {
+        parent::__construct( \Base::instance()->get('DB'), 'car');
+    }
+}
+
 class LoansDetail extends \DB\SQL\Mapper {
     public function __construct() {
         parent::__construct( \Base::instance()->get('DB'), 'loan_details');
@@ -78,12 +85,6 @@ class LoansDetail extends \DB\SQL\Mapper {
         }
 
         return $this->db->exec($sql);
-    }
-}
-
-class Car extends \DB\SQL\Mapper {
-    public function __construct() {
-        parent::__construct( \Base::instance()->get('DB'), 'car');
     }
 }
 
@@ -190,6 +191,30 @@ class SpouseIncome extends \DB\SQL\Mapper {
 class Income extends \DB\SQL\Mapper {
     public function __construct() {
         parent::__construct( \Base::instance()->get('DB'), 'income');
+    }
+}
+
+class CarController {
+    public function car_list($f3) {
+        $post_data = $f3->get('POST');
+        if ($post_data) {
+            $car = new Car();
+            if (isset($post_data["approve"])) {
+                $car_id = $post_data["approve"];
+                $car_data = $car->load(array("car_id=?", $car_id));
+                $car_data->ci_status = 'Approved';
+                $car_data->ci_amount = $post_data["amount_$car_id"];
+            } else {
+                $car_id = $post_data["reject"];
+                $car_data = $car->load(array("car_id=?", $car_id));
+                $car_data->ci_status = 'Rejected';
+            }
+            $car_data->update();
+        }
+        $car_details = new LoansDetail();
+        $results = $car_details->get_user_loans("ci_status='Pending'");
+        $f3->set('car_results', $results);
+        echo Template::instance()->render('cars.html');
     }
 }
 
@@ -336,7 +361,7 @@ class UserController {
                     $user->erase(array("email='$email'"));
                     $results =$users->find();
                 } else {
-                    $results = $users->get_search_results($post_data["query"]);
+                    $results = $users->get_search_results($post_data["search_query"]);
                 }
             } else {
                 $results =$users->find();
@@ -484,6 +509,9 @@ class AuthController {
                 if ($u) {
                     new \Session();
                     $f3->set('SESSION.user', $u);
+                    if ($u['user_type'] =="ci") {
+                        $f3->reroute('/cars');
+                    }
                     $f3->reroute('/loan');
                 }
                 $login_error = 'Critical error! Contanct administrator.';
@@ -658,8 +686,7 @@ class LoanController {
             $loans = new Loan();
             $loans->borrower_id=$user['id'];
             $loans->term=$post_data['loan_term'];
-            //TODO: Fix this.
-            $loans->date = 'NOW()';
+            $loans->date = date('Y-m-d');
             $loans->save();
 
             $loan_details = new LoansDetail();
